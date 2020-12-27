@@ -2,12 +2,8 @@ import json
 from typing import Dict, List
 
 from sklearn.feature_extraction.text import (
-    CountVectorizer,
-    TfidfTransformer,
     TfidfVectorizer,
 )
-
-import pandas as pd
 
 
 def get_most_frequent_words(n: int = 10):
@@ -30,22 +26,6 @@ def get_most_frequent_words(n: int = 10):
     print(top_n_words)
 
 
-def get_tf_idf_transformer(cv_matrix):
-    tf_idf_transformer = TfidfTransformer(smooth_idf=True, use_idf=True)
-    tf_idf_transformer.fit(cv_matrix)
-
-    return tf_idf_transformer
-
-
-def get_count_vectorizer(normalized_dataset):
-    count_vectorizer = CountVectorizer()
-
-    return (
-        count_vectorizer.fit_transform(normalized_dataset),
-        count_vectorizer.get_feature_names(),
-    )
-
-
 def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
     normalized_dataset = []
 
@@ -57,24 +37,11 @@ def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
     return normalized_dataset
 
 
-def build_tf_idf_matrix(dataset):
-    tf = TfidfVectorizer(analyzer="word", ngram_range=(1, 3), min_df=0)
-    tf.fit_transform(dataset)
-
-    df = pd.DataFrame()
-
-    return tf
-
-
 def get_captions_as_json() -> List[Dict]:
     with open("../../data/processed/caption/dataset.jsonl", "r") as json_file:
         json_list = list(json_file)
 
     return [json.loads(json_str) for json_str in json_list]
-
-
-def consolidate_sentences(first_sentence, second_sentence):
-    return f"{first_sentence} {second_sentence}"
 
 
 def sort_tf_idf_vectors(coo_matrix):
