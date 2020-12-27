@@ -4,22 +4,22 @@ from typing import List
 
 from tqdm import tqdm
 
-from backend.language_detection import LanguageDetection
+from learn_with_me.backend.caption_downloader.language_detection import LanguageDetection
 
 language_detection = LanguageDetection()
 
 
 def main() -> None:
+    _base_url = 'https://www.youtube.com/watch?v='
+    _lang = "en"
+
     video_ids = get_english_video_ids()
 
-    download_captions(video_ids)
+    download_captions(video_ids, _base_url, _lang)
 
 
-def download_captions(video_ids: List[str]) -> None:
-    base_url = 'https://www.youtube.com/watch?v='
-    lang = "en"
-
-    os.chdir("../data/raw/")
+def download_captions(video_ids: List[str], base_url: str, lang: str) -> None:
+    os.chdir("../../data/raw/")
 
     for video_id in tqdm(video_ids):
         url = base_url + video_id
@@ -29,7 +29,7 @@ def download_captions(video_ids: List[str]) -> None:
 
 
 def get_english_video_ids() -> List[str]:
-    with open('../data/processed/results.jsonl', 'r') as results_file:
+    with open('../../data/processed/results.jsonl', 'r') as results_file:
         results = list(results_file)
 
     video_list = [json.loads(result) for result in results]

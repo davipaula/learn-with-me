@@ -1,12 +1,12 @@
 import os
 
-from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
-from backend.utils import save_as_json
+from learn_with_me.backend.utils import save_as_json
 
 OUTPUT_PATH = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn-with-me/data/processed/results.jsonl"
+    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/processed/results.jsonl"
 )
 
 CLIENT_SECRETS_FILE = "/secrets/youtube_client.json"
@@ -22,16 +22,6 @@ def get_authenticated_service():
 
     print(credentials)
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-
-# Remove keyword arguments that are not set
-def remove_empty_kwargs(**kwargs):
-    good_kwargs = {}
-    if kwargs is not None:
-        for key, value in kwargs.items():
-            if value:
-                good_kwargs[key] = value
-    return good_kwargs
 
 
 def youtube_search(client, **kwargs):

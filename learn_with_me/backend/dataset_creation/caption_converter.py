@@ -4,16 +4,16 @@ from collections import defaultdict
 from typing import List
 
 from tqdm import tqdm
-from utils import save_as_json
+# from utils import save_as_json
 
 import webvtt
 
 RAW_DATA_FOLDER = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn-with-me/data/raw/"
+    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/raw/"
 )
 
 OUTPUT_FOLDER = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn-with-me/data/processed/dataset.jsonl"
+    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/processed/dataset.jsonl"
 )
 
 
