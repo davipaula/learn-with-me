@@ -1,23 +1,30 @@
 import json
 import os
 from collections import defaultdict
-from typing import List
+from typing import Dict, List
 
 from tqdm import tqdm
-# from utils import save_as_json
 
 import webvtt
 
-RAW_DATA_FOLDER = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/raw/"
-)
+RAW_DATA_FOLDER = "/Users/dnascimentodepau/Documents/personal/projects/learn-with-me/learn_with_me/data/raw/caption/"
 
-OUTPUT_FOLDER = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/processed/dataset.jsonl"
-)
+OUTPUT_FOLDER = "/Users/dnascimentodepau/Documents/personal/projects/learn-with-me/learn_with_me/data/processed/caption/dataset.jsonl"
 
 
-def convert_vtt(filenames: List[str]) -> None:
+def run():
+    caption_files = [
+        os.fsdecode(file)
+        for file in os.listdir(RAW_DATA_FOLDER)
+        if os.fsdecode(file).endswith(".vtt")
+    ]
+
+    captions = create_captions_dataset(caption_files)
+
+    save_as_json(captions)
+
+
+def create_captions_dataset(filenames: List[str]) -> Dict[list]:
     captions = defaultdict(list)
 
     for file in tqdm(filenames):
@@ -37,6 +44,10 @@ def convert_vtt(filenames: List[str]) -> None:
 
         captions[file] = video_captions
 
+    return captions
+
+
+def save_as_json(captions):
     with open(OUTPUT_FOLDER, "w") as output_file:
         print("Saving files")
         for line in tqdm(captions.items()):
@@ -45,12 +56,4 @@ def convert_vtt(filenames: List[str]) -> None:
 
 
 if __name__ == "__main__":
-    filenames_vtt = [
-        os.fsdecode(file)
-        for file in os.listdir(RAW_DATA_FOLDER)
-        if os.fsdecode(file).endswith(".vtt")
-    ]
-
-    print(len(filenames_vtt))
-
-    convert_vtt(filenames_vtt)
+    run()
