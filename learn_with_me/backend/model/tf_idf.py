@@ -1,36 +1,96 @@
 import json
+import logging
 from typing import Dict, List
 
 from sklearn.feature_extraction.text import (
     TfidfVectorizer,
 )
 
+logger = logging.getLogger(__name__)
+LOG_FORMAT = (
+    "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
+)
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-def get_most_frequent_words(n: int = 10):
+
+def run(n: int = 10):
     captions = get_captions_as_json()
 
+    # TODO preprocess text: noise removal, stop-word removal, lemmatization
     captions_text = get_captions_text(captions)
 
     # TODO save this model
-    tf_idf_vectors = TfidfVectorizer(analyzer="word", min_df=0)
-    tf_idf_result = tf_idf_vectors.fit_transform(captions_text)
-
-    # TODO combine captions from the same subject to identify the most important words of this subject
-    caption_test = sort_tf_idf_vectors(tf_idf_result[15].tocoo())
-
-    # TODO load model from file
-    top_n_words = get_top_n_words_from_vector(
-        tf_idf_vectors.get_feature_names(), caption_test, n
+    logger.info("Training model over corpus")
+    tf_idf_vectors = TfidfVectorizer(
+        analyzer="word", min_df=0, max_df=0.8, stop_words="english"
     )
+    # tf_idf_result = tf_idf_vectors.fit_transform(captions_text)
+    tf_idf_vectors.fit(captions_text)
 
-    print(top_n_words)
+    # TODO combine video_captions from the same subject to identify the most important words of this subject
+    topics = [
+        "technology",
+        "entertainment",
+        "design",
+        "business",
+        "science",
+        "global issues",
+    ]
+
+    for topic in topics:
+        logger.info(f"Getting most frequent words for topic {topic}")
+
+        topic_text = get_topic_text(topic)
+        tf_idf_topic = tf_idf_vectors.transform([topic_text])
+        sorted_vectors = sort_tf_idf_vectors(tf_idf_topic.tocoo())
+
+        # caption_test = sort_tf_idf_vectors(tf_idf_result[15].tocoo())
+
+        # TODO load model from file
+        top_n_words = get_top_n_words_from_topic(
+            tf_idf_vectors.get_feature_names(), sorted_vectors, n
+        )
+
+        logger.info(top_n_words)
+
+
+def get_topic_text(topic: str) -> str:
+    with open("../../data/processed/ted_results.jsonl", "r") as json_file:
+        json_lines = list(json_file)
+
+    ted_videos = [json.loads(json_line) for json_line in json_lines]
+
+    # Need to normalize file name and video title. Currently they are different
+    # TODO think about how to store the id the right way
+    videos_in_topic = [
+        video["id"].rsplit("/talks/")[1]
+        for video in ted_videos
+        if video["topic"] == topic
+    ]
+
+    # Need to change `dataset.jsonl` to the right json format (key, value). Currently the key is the file name
+    captions = get_captions_as_json()
+
+    # TODO create a Caption data class and add methods to avoid this absurd data manipulation
+    captions_from_topic = [
+        caption
+        for caption in captions
+        if caption["title"].rsplit(".en.vtt")[0] in videos_in_topic
+    ]
+
+    # TODO check why length of videos_in_topic and captions_from_topic do not match
+    # print(len(captions_from_topic))
+
+    topic_text = get_captions_text(captions_from_topic)
+
+    return " ".join(topic_text)
 
 
 def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
     normalized_dataset = []
 
     for caption in captions:
-        normalized_captions = [sentence["text"] for sentence in caption[1]]
+        normalized_captions = [sentence["text"] for sentence in caption["captions"]]
 
         normalized_dataset.append(" ".join(normalized_captions))
 
@@ -50,11 +110,11 @@ def sort_tf_idf_vectors(coo_matrix):
     return sorted(tuples, key=lambda x: (x[1], x[0]), reverse=True)
 
 
-def get_top_n_words_from_vector(feature_names, sorted_vectors, n: int = 10):
+def get_top_n_words_from_topic(feature_names, sorted_vectors, n: int = 10):
     top_n_vectors = sorted_vectors[:n]
 
     return {feature_names[index]: round(score, 3) for index, score in top_n_vectors}
 
 
 if __name__ == "__main__":
-    print(get_most_frequent_words())
+    run()
