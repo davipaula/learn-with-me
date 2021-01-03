@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pickle
 from typing import Dict, List
 
 from sklearn.feature_extraction.text import (
@@ -9,10 +10,13 @@ from sklearn.feature_extraction.text import (
 
 # Bad hack to access the files
 # TODO fix it
+from app.text_processor.text_processor import TextProcessor
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 TED_RESULTS_PATH = "../data/processed/ted_results.jsonl"
 CAPTION_DATASET_PATH = "../data/processed/caption/dataset.jsonl"
+TF_IDF_MODEL_PATH = "../data/model/tf_idf.pkl"
 
 logger = logging.getLogger(__name__)
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
@@ -20,32 +24,33 @@ logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 
 def run(topic: str, n: int = 10):
-    captions = get_captions_as_json()
-
-    # TODO preprocess text: noise removal, stop-word removal, lemmatization
-    captions_text = get_captions_text(captions)
-
-    # TODO save this model
-    logger.info("Training model over corpus")
-    tf_idf_vectors = TfidfVectorizer(
-        analyzer="word", min_df=0, max_df=0.8, stop_words="english"
-    )
-    # tf_idf_result = tf_idf_vectors.fit_transform(captions_text)
-    tf_idf_vectors.fit(captions_text)
-
-    logger.info(f"Getting most frequent words for topic {topic}")
+    tf_idf_vectors = pickle.load(open(TF_IDF_MODEL_PATH, "rb"))
 
     topic_text = get_topic_text(topic)
     tf_idf_topic = tf_idf_vectors.transform([topic_text])
     sorted_vectors = sort_tf_idf_vectors(tf_idf_topic.tocoo())
 
-    top_n_words = get_top_n_words_from_topic(
+    return get_top_n_words_from_topic(
         tf_idf_vectors.get_feature_names(), sorted_vectors, n
     )
 
-    logger.info(top_n_words)
 
-    return top_n_words
+def train():
+    captions = get_captions_as_json()
+
+    # TODO preprocess text: noise removal, stop-word removal, lemmatization
+    captions_text = get_captions_text(captions)
+
+    logger.info("Training model over corpus")
+    tf_idf_vectors = TfidfVectorizer(
+        analyzer="word", min_df=0, max_df=0.8, stop_words="english"
+    )
+    tf_idf_model = tf_idf_vectors.fit(captions_text)
+
+    logger.info("Training finished. Saving model")
+    pickle.dump(tf_idf_model, open(TF_IDF_MODEL_PATH, "wb"))
+
+    logger.info("Model saved successfully")
 
 
 def get_topic_text(topic: str) -> str:
@@ -82,15 +87,22 @@ def get_topic_text(topic: str) -> str:
 
 def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
     normalized_dataset = []
+    text_processor = TextProcessor()
 
-    for caption in captions:
+    logger.info("Getting captions")
+    for index, caption in enumerate(captions):
         normalized_captions = [
             sentence["text"] for sentence in caption["captions"]
         ]
 
         normalized_dataset.append(" ".join(normalized_captions))
 
-    return normalized_dataset
+    logger.info("Cleaning captions")
+
+    # Ideally we should store the captions with the text clean.
+    # However, as the steps needed to are not clear yet, I decided to perform the cleaning here.
+    # It has a big negative impact in the performance
+    return text_processor.clean_texts(normalized_dataset)
 
 
 def get_captions_as_json() -> List[Dict]:
@@ -115,4 +127,5 @@ def get_top_n_words_from_topic(feature_names, sorted_vectors, n: int = 10):
 
 
 if __name__ == "__main__":
-    run()
+    # train()
+    print(run("business"))

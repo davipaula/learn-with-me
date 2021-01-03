@@ -2,7 +2,6 @@ import json
 import os
 from typing import List
 
-from tqdm import tqdm
 
 # from learn_with_me.backend.caption_downloader.language_detection import (
 #     LanguageDetection,
