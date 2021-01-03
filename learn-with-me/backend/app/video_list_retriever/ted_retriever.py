@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from learn_with_me.backend.video_list_retriever.page_url import Video
+from .page_url import Video
 
 logger = logging.getLogger(__name__)
 LOG_FORMAT = (

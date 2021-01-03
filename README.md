@@ -1,4 +1,5 @@
-# learn-with-me
+# Learn With Me
+An app to help language learners to learn subject-specific words.
 
 ## Features
 

@@ -4,6 +4,7 @@ import uvicorn
 
 from app.api.api_v1.routers.users import users_router
 from app.api.api_v1.routers.auth import auth_router
+from app.api.api_v1.routers.words import words_router
 from app.core import config
 from app.db.session import SessionLocal
 from app.core.auth import get_current_active_user
@@ -36,6 +37,11 @@ async def example_task():
     return {"message": "success"}
 
 
+@app.get("/api/v1/testing")
+async def testing():
+    return {"message": "Testing success"}
+
+
 # Routers
 app.include_router(
     users_router,
@@ -44,6 +50,7 @@ app.include_router(
     dependencies=[Depends(get_current_active_user)],
 )
 app.include_router(auth_router, prefix="/api", tags=["auth"])
+app.include_router(words_router, prefix="/api/v1", tags=["words"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8888)

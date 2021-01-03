@@ -1,19 +1,25 @@
 import json
 import logging
+import os
 from typing import Dict, List
 
 from sklearn.feature_extraction.text import (
     TfidfVectorizer,
 )
 
+# Bad hack to access the files
+# TODO fix it
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+TED_RESULTS_PATH = "../data/processed/ted_results.jsonl"
+CAPTION_DATASET_PATH = "../data/processed/caption/dataset.jsonl"
+
 logger = logging.getLogger(__name__)
-LOG_FORMAT = (
-    "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
-)
+LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 
-def run(n: int = 10):
+def run(topic: str, n: int = 10):
     captions = get_captions_as_json()
 
     # TODO preprocess text: noise removal, stop-word removal, lemmatization
@@ -27,35 +33,23 @@ def run(n: int = 10):
     # tf_idf_result = tf_idf_vectors.fit_transform(captions_text)
     tf_idf_vectors.fit(captions_text)
 
-    # TODO combine video_captions from the same subject to identify the most important words of this subject
-    topics = [
-        "technology",
-        "entertainment",
-        "design",
-        "business",
-        "science",
-        "global issues",
-    ]
+    logger.info(f"Getting most frequent words for topic {topic}")
 
-    for topic in topics:
-        logger.info(f"Getting most frequent words for topic {topic}")
+    topic_text = get_topic_text(topic)
+    tf_idf_topic = tf_idf_vectors.transform([topic_text])
+    sorted_vectors = sort_tf_idf_vectors(tf_idf_topic.tocoo())
 
-        topic_text = get_topic_text(topic)
-        tf_idf_topic = tf_idf_vectors.transform([topic_text])
-        sorted_vectors = sort_tf_idf_vectors(tf_idf_topic.tocoo())
+    top_n_words = get_top_n_words_from_topic(
+        tf_idf_vectors.get_feature_names(), sorted_vectors, n
+    )
 
-        # caption_test = sort_tf_idf_vectors(tf_idf_result[15].tocoo())
+    logger.info(top_n_words)
 
-        # TODO load model from file
-        top_n_words = get_top_n_words_from_topic(
-            tf_idf_vectors.get_feature_names(), sorted_vectors, n
-        )
-
-        logger.info(top_n_words)
+    return top_n_words
 
 
 def get_topic_text(topic: str) -> str:
-    with open("../../data/processed/ted_results.jsonl", "r") as json_file:
+    with open(TED_RESULTS_PATH, "r") as json_file:
         json_lines = list(json_file)
 
     ted_videos = [json.loads(json_line) for json_line in json_lines]
@@ -90,7 +84,9 @@ def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
     normalized_dataset = []
 
     for caption in captions:
-        normalized_captions = [sentence["text"] for sentence in caption["captions"]]
+        normalized_captions = [
+            sentence["text"] for sentence in caption["captions"]
+        ]
 
         normalized_dataset.append(" ".join(normalized_captions))
 
@@ -98,7 +94,7 @@ def get_captions_text(captions: List[Dict[str, List]]) -> List[str]:
 
 
 def get_captions_as_json() -> List[Dict]:
-    with open("../../data/processed/caption/dataset.jsonl", "r") as json_file:
+    with open(CAPTION_DATASET_PATH, "r") as json_file:
         json_list = list(json_file)
 
     return [json.loads(json_str) for json_str in json_list]
@@ -113,7 +109,9 @@ def sort_tf_idf_vectors(coo_matrix):
 def get_top_n_words_from_topic(feature_names, sorted_vectors, n: int = 10):
     top_n_vectors = sorted_vectors[:n]
 
-    return {feature_names[index]: round(score, 3) for index, score in top_n_vectors}
+    return {
+        feature_names[index]: round(score, 3) for index, score in top_n_vectors
+    }
 
 
 if __name__ == "__main__":
