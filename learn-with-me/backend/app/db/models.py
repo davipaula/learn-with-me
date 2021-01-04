@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.dialects.postgresql import JSONB
 
 from .session import Base
 
@@ -13,3 +14,10 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+
+
+class VideoCaption(Base):
+    __tablename__ = "video_caption"
+
+    title = Column(String, primary_key=True)
+    caption = Column(JSONB)

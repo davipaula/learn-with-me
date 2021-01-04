@@ -39,8 +39,7 @@ def run():
 def create_captions_dataset(file_names: List[str]) -> List[VideoCaption]:
     captions = []
 
-
-    # logger.info("Creating captions dataset")
+    logger.info("Creating captions dataset")
     for file_name in tqdm(file_names):
         raw_captions = webvtt.read(RAW_DATA_FOLDER + file_name)
 
@@ -51,7 +50,7 @@ def create_captions_dataset(file_names: List[str]) -> List[VideoCaption]:
                     ("start", caption.start),
                     ("end", caption.end),
                     ("text", caption.text),
-                    ("normalized_text",)
+                    ("normalized_text",),
                 )
             }
             for caption in raw_captions

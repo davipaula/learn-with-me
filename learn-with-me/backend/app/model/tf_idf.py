@@ -23,7 +23,7 @@ LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 
-def run(topic: str, n: int = 10):
+def run(topic: str, n: int = 50):
     tf_idf_vectors = pickle.load(open(TF_IDF_MODEL_PATH, "rb"))
 
     topic_text = get_topic_text(topic)

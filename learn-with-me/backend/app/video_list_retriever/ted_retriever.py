@@ -7,12 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from .page_url import Video
+from page_url import Video
 
 logger = logging.getLogger(__name__)
-LOG_FORMAT = (
-    "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
-)
+LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 
@@ -40,12 +38,14 @@ def run() -> None:
         _url = f"https://www.ted.com/talks?language=en&sort=popular&topics%5B%5D={topic}&page="
 
         number_of_result_pages = _get_number_of_result_pages(_url)
-        topic_videos = get_videos_from_topic(_url, number_of_result_pages, topic)
+        topic_videos = get_videos_from_topic(
+            _url, number_of_result_pages, topic
+        )
 
         all_topics_videos.extend(topic_videos)
 
     logger.info(f"{len(all_topics_videos)} videos found. Saving results.")
-    _save_as_json(all_topics_videos, "../../data/processed/ted_results.jsonl")
+    # _save_as_json(all_topics_videos, "../../data/processed/ted_results.jsonl")
 
     logger.info(f"Process finished successfully")
 
@@ -67,12 +67,18 @@ def get_videos_from_topic(
 
         parsed_page = get_parsed_page(current_url)
 
-        talks_header_tags = parsed_page.find_all("h4", {"class": talks_header_class})
+        talks_header_tags = parsed_page.find_all(
+            "h4", {"class": talks_header_class}
+        )
 
-        talks_a_tags = [talk_header.find("a") for talk_header in talks_header_tags]
+        talks_a_tags = [
+            talk_header.find("a") for talk_header in talks_header_tags
+        ]
 
         videos_in_page = [
-            Video(title=a_tag.text, id=_clean_link(a_tag.get("href")), topic=topic)
+            Video(
+                title=a_tag.text, id=_clean_link(a_tag.get("href")), topic=topic
+            )
             for a_tag in talks_a_tags
         ]
 
@@ -87,12 +93,10 @@ def _get_number_of_result_pages(url: str) -> int:
     tags_class = "pagination__item pagination__link"
     results_pages = parsed_page.find_all("a", {"class": tags_class})
 
-    try:
-        result = int(results_pages[-1].text)
-    except Exception as e:
-        print("Check here")
+    if len(results_pages) == 0:
+        return 0
 
-    return result
+    return int(results_pages[-1].text)
 
 
 def get_parsed_page(url: str):

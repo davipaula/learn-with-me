@@ -39,6 +39,22 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
+def create_video_caption(db: Session, video_caption: schemas.VideoCaption):
+    db_video_caption = models.VideoCaption(
+        title=video_caption.title, caption=video_caption.caption
+    )
+    db.add(db_video_caption)
+    db.commit()
+    db.refresh(db_video_caption)
+    return db_video_caption
+
+
+def get_video_captions(
+    db: Session, skip: int = 0, limit: int = 10
+) -> t.List[schemas.VideoCaption]:
+    return db.query(models.VideoCaption).offset(skip).limit(limit).all()
+
+
 def delete_user(db: Session, user_id: int):
     user = get_user(db, user_id)
     if not user:
