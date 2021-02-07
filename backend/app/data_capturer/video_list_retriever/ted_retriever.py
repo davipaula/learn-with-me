@@ -45,7 +45,7 @@ def run() -> None:
         all_topics_videos.extend(topic_videos)
 
     logger.info(f"{len(all_topics_videos)} videos found. Saving results.")
-    # _save_as_json(all_topics_videos, "../../data/processed/ted_results.jsonl")
+    _save_as_json(all_topics_videos, "../../data/processed/ted_results.jsonl")
 
     logger.info(f"Process finished successfully")
 
@@ -91,12 +91,12 @@ def _get_number_of_result_pages(url: str) -> int:
     parsed_page = get_parsed_page(url)
 
     tags_class = "pagination__item pagination__link"
-    results_pages = parsed_page.find_all("a", {"class": tags_class})
+    number_of_result_pages = parsed_page.find_all("a", {"class": tags_class})
 
-    if len(results_pages) == 0:
+    if len(number_of_result_pages) == 0:
         return 0
 
-    return int(results_pages[-1].text)
+    return int(number_of_result_pages[-1].text)
 
 
 def get_parsed_page(url: str):

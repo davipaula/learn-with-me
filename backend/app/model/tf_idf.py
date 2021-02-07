@@ -10,7 +10,7 @@ from sklearn.feature_extraction.text import (
 
 # Bad hack to access the files
 # TODO fix it
-from app.text_processor.text_processor import TextProcessor
+from app.data_capturer.text_processor import TextProcessor
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -35,7 +35,7 @@ def run(topic: str, n: int = 50):
     )
 
 
-def train():
+def train() -> None:
     captions = get_captions_as_json()
 
     # TODO preprocess text: noise removal, stop-word removal, lemmatization

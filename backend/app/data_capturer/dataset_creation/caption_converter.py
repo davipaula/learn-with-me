@@ -6,7 +6,7 @@ from typing import List
 import webvtt
 from tqdm import tqdm
 
-from app.video_list_retriever.video_caption import VideoCaption
+from app.data_capturer.video_list_retriever import VideoCaption
 
 # Bad hack to access the files
 # TODO fix it
