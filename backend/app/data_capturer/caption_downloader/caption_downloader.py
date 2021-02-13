@@ -3,7 +3,7 @@ import os
 from typing import List
 
 
-# from learn_with_me.backend.caption_downloader.language_detection import (
+# from vocable_me.backend.caption_downloader.language_detection import (
 #     LanguageDetection,
 # )
 #

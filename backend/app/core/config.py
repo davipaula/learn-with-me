@@ -1,6 +1,6 @@
 import os
 
-PROJECT_NAME = "learn-with-me"
+PROJECT_NAME = "vocable-me"
 
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 

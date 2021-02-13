@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 
 from .session import Base
@@ -20,4 +20,4 @@ class VideoCaption(Base):
     __tablename__ = "video_caption"
 
     title = Column(String, primary_key=True)
-    caption = Column(JSONB)
+    caption = Column(JSONB(astext_type=Text()))

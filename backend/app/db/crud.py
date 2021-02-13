@@ -1,9 +1,18 @@
+import logging
+
+import sqlalchemy
 from fastapi import HTTPException, status
+from sqlalchemy import String, cast, type_coerce
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 import typing as t
 
 from . import models, schemas
 from app.core.security import get_password_hash
+
+logger = logging.getLogger(__name__)
+LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s (%(funcName)s@%(filename)s:%(lineno)s)"
+logging.basicConfig(level=logging.NOTSET, format=LOG_FORMAT)
 
 
 def get_user(db: Session, user_id: int):
@@ -52,7 +61,18 @@ def create_video_caption(db: Session, video_caption: schemas.VideoCaption):
 def get_video_captions(
     db: Session, skip: int = 0, limit: int = 10
 ) -> t.List[schemas.VideoCaption]:
-    return db.query(models.VideoCaption).offset(skip).limit(limit).all()
+    value = (
+        db.query(models.VideoCaption)
+        .filter(
+            models.VideoCaption.caption['text'].astext
+            == '{"text": "for them not to suffer"}'
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    return value
 
 
 def delete_user(db: Session, user_id: int):

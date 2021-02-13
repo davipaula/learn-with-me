@@ -9,8 +9,8 @@ def run():
 
 
 def trim_file(start, end):
-    file_path = "../../../learn_with_me/data/raw/audio/"
-    output_path = "../../../learn_with_me/data/processed/audio/"
+    file_path = "../../../vocable_me/data/raw/audio/"
+    output_path = "../../../vocable_me/data/processed/audio/"
 
     input_name = "Reprogramming your brain to overcome fear - Olympia LePoint at TEDxPCC-1PV7Hy_8fhA.mp3"
     output_name = f"{start}-{end}-{input_name}"

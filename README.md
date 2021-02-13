@@ -1,4 +1,4 @@
-# Learn With Me
+# Vocable.me
 An app to help language learners to learn subject-specific words.
 
 ## Features

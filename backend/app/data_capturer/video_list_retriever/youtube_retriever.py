@@ -3,10 +3,10 @@ import os
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from learn_with_me.backend.utils import save_as_json
+from app.utils.utils import save_as_json
 
 OUTPUT_PATH = (
-    "/Users/dnascimentodepau/Documents/personal/projects/learn_with_me/data/processed/results.jsonl"
+    "/Users/dnascimentodepau/Documents/personal/projects/vocable_me/data/processed/results.jsonl"
 )
 
 CLIENT_SECRETS_FILE = "/secrets/youtube_client.json"
